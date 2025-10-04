@@ -56,3 +56,7 @@ dkms.conf
 
 # kyber installation
 kyber/
+
+# files by program
+Alice-*
+Bob-*

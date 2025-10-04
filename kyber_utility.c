@@ -55,76 +55,76 @@ int read_from_file(const char *filename, unsigned char *data, size_t len) {
 
 // Функция 1: Генерация пары ключей и сохранение в файлы
 void generate_keys(const char *pub_file, const char *priv_file) {
-    unsigned char pk[CRYPTO_PUBLICKEYBYTES];
-    unsigned char sk[CRYPTO_SECRETKEYBYTES];
-    if (crypto_kem_keypair(pk, sk) != 0) {
+    unsigned char pk[KYBER_PUBLICKEYBYTES];
+    unsigned char sk[KYBER_SECRETKEYBYTES];
+    if (pqcrystals_kyber768_ref_keypair(pk, sk) != 0) {
         fprintf(stderr, "Ошибка генерации ключей\n");
         return;
     }
-    if (write_to_file(pub_file, pk, CRYPTO_PUBLICKEYBYTES) != 0) {
+    if (write_to_file(pub_file, pk, KYBER_PUBLICKEYBYTES) != 0) {
         fprintf(stderr, "Ошибка записи в %s\n", pub_file);
     }
-    if (write_to_file(priv_file, sk, CRYPTO_SECRETKEYBYTES) != 0) {
+    if (write_to_file(priv_file, sk, KYBER_SECRETKEYBYTES) != 0) {
         fprintf(stderr, "Ошибка записи в %s\n", priv_file);
     }
 }
 
 // Функция 2: Вычисление общего секрета и шифра по публичному ключу
 void generate_secret_and_cipher(const char *pub_file, const char *secret_file, const char *cipher_file) {
-    unsigned char pk[CRYPTO_PUBLICKEYBYTES];
-    if (read_from_file(pub_file, pk, CRYPTO_PUBLICKEYBYTES) != 0) {
+    unsigned char pk[KYBER_PUBLICKEYBYTES];
+    if (read_from_file(pub_file, pk, KYBER_PUBLICKEYBYTES) != 0) {
         fprintf(stderr, "Ошибка чтения %s\n", pub_file);
         return;
     }
-    unsigned char ct[CRYPTO_CIPHERTEXTBYTES];
-    unsigned char ss[CRYPTO_BYTES];
-    if (crypto_kem_enc(ct, ss, pk) != 0) {
+    unsigned char ct[KYBER_CIPHERTEXTBYTES];
+    unsigned char ss[KYBER_SSBYTES];
+    if (pqcrystals_kyber768_ref_enc(ct, ss, pk) != 0) {
         fprintf(stderr, "Ошибка энкапсуляции\n");
         return;
     }
-    if (write_to_file(secret_file, ss, CRYPTO_BYTES) != 0) {
+    if (write_to_file(secret_file, ss, KYBER_SSBYTES) != 0) {
         fprintf(stderr, "Ошибка записи в %s\n", secret_file);
     }
-    if (write_to_file(cipher_file, ct, CRYPTO_CIPHERTEXTBYTES) != 0) {
+    if (write_to_file(cipher_file, ct, KYBER_CIPHERTEXTBYTES) != 0) {
         fprintf(stderr, "Ошибка записи в %s\n", cipher_file);
     }
 }
 
 // Функция 3: Вычисление общего секрета по шифру и приватному ключу
 void compute_secret(const char *cipher_file, const char *priv_file, const char *secret_file) {
-    unsigned char ct[CRYPTO_CIPHERTEXTBYTES];
-    unsigned char sk[CRYPTO_SECRETKEYBYTES];
-    if (read_from_file(cipher_file, ct, CRYPTO_CIPHERTEXTBYTES) != 0) {
+    unsigned char ct[KYBER_CIPHERTEXTBYTES];
+    unsigned char sk[KYBER_SECRETKEYBYTES];
+    if (read_from_file(cipher_file, ct, KYBER_CIPHERTEXTBYTES) != 0) {
         fprintf(stderr, "Ошибка чтения %s\n", cipher_file);
         return;
     }
-    if (read_from_file(priv_file, sk, CRYPTO_SECRETKEYBYTES) != 0) {
+    if (read_from_file(priv_file, sk, KYBER_SECRETKEYBYTES) != 0) {
         fprintf(stderr, "Ошибка чтения %s\n", priv_file);
         return;
     }
-    unsigned char ss[CRYPTO_BYTES];
-    if (crypto_kem_dec(ss, ct, sk) != 0) {
+    unsigned char ss[KYBER_SSBYTES];
+    if (pqcrystals_kyber768_ref_dec(ss, ct, sk) != 0) {
         fprintf(stderr, "Ошибка декапсуляции\n");
         return;
     }
-    if (write_to_file(secret_file, ss, CRYPTO_BYTES) != 0) {
+    if (write_to_file(secret_file, ss, KYBER_SSBYTES) != 0) {
         fprintf(stderr, "Ошибка записи в %s\n", secret_file);
     }
 }
 
 // Функция 4: Сравнение двух секретов
 void compare_secrets(const char *secret1, const char *secret2) {
-    unsigned char ss1[CRYPTO_BYTES];
-    unsigned char ss2[CRYPTO_BYTES];
-    if (read_from_file(secret1, ss1, CRYPTO_BYTES) != 0) {
+    unsigned char ss1[KYBER_SSBYTES];
+    unsigned char ss2[KYBER_SSBYTES];
+    if (read_from_file(secret1, ss1, KYBER_SSBYTES) != 0) {
         fprintf(stderr, "Ошибка чтения %s\n", secret1);
         return;
     }
-    if (read_from_file(secret2, ss2, CRYPTO_BYTES) != 0) {
+    if (read_from_file(secret2, ss2, KYBER_SSBYTES) != 0) {
         fprintf(stderr, "Ошибка чтения %s\n", secret2);
         return;
     }
-    if (verify(ss1, ss2, CRYPTO_BYTES) == 0) {
+    if (verify(ss1, ss2, KYBER_SSBYTES) == 0) {
         printf("Секреты совпадают\n");
     } else {
         printf("Секреты НЕ совпадают\n");
@@ -133,13 +133,13 @@ void compare_secrets(const char *secret1, const char *secret2) {
 
 // Функция 5: Вывод Base64 от секрета
 void print_base64_secret(const char *secret_file) {
-    unsigned char ss[CRYPTO_BYTES];
-    if (read_from_file(secret_file, ss, CRYPTO_BYTES) != 0) {
+    unsigned char ss[KYBER_SSBYTES];
+    if (read_from_file(secret_file, ss, KYBER_SSBYTES) != 0) {
         fprintf(stderr, "Ошибка чтения %s\n", secret_file);
         return;
     }
-    char base64[ ((CRYPTO_BYTES + 2) / 3) * 4 + 1 ];
-    base64_encode(ss, CRYPTO_BYTES, base64);
+    char base64[ ((KYBER_SSBYTES + 2) / 3) * 4 + 1 ];
+    base64_encode(ss, KYBER_SSBYTES, base64);
     printf("Base64 секрета: %s\n", base64);
 }
 
@@ -155,12 +155,14 @@ void print_help() {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        print_help();
-        return 1;
-    }
+    // if (argc != 2) {
+    //     print_help();
+    //     return 1;
+    // }
 
-    int cmd = atoi(argv[1]);
+    printf("Enter command: ");
+    int cmd = 0;
+    scanf("%d", &cmd);
 
     switch (cmd) {
         case 0:
