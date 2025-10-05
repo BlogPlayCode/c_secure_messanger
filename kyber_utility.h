@@ -1,5 +1,6 @@
 #ifndef KYBER_UTILITY_H
 #define KYBER_UTILITY
+#include <stdlib.h>
 
 void base64_encode(const unsigned char *input, size_t input_len, char *output);
 int write_to_file(const char *filename, const unsigned char *data, size_t len);

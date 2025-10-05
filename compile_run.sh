@@ -1,1 +1,1 @@
-./compile.sh && ./kyber_utility.o
+./compile.sh && ./test_utility.out

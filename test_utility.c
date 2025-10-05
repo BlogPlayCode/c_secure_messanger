@@ -1,15 +1,16 @@
 #include "kyber_utility.h"
+#include <stdio.h>
 
 
 int main(int argc, char *argv[]) {
-    // if (argc != 2) {
-    //     print_help();
-    //     return 1;
-    // }
 
-    printf("Enter command: ");
-    int cmd = 0; // argv[1]
-    scanf("%d", &cmd);
+    int cmd = 0;
+    if (argc < 2) {
+        printf("Enter command: ");
+        scanf("%d", &cmd);
+    } else {
+        cmd = atoi(argv[1]);
+    }
 
     switch (cmd) {
         case 0:
