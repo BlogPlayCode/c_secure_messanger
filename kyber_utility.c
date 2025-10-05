@@ -53,6 +53,17 @@ int read_from_file(const char *filename, unsigned char *data, size_t len) {
     return (read == len) ? 0 : -1;
 }
 
+// Вспомогательная функция для помощи
+void print_help() {
+    printf("Использование: ./program <команда>\n");
+    printf("0 - Помощь\n");
+    printf("1 - Генерация ключей (использует Alice-pub.key и Alice-priv.key)\n");
+    printf("2 - Генерация секрета и шифра Боба (использует Alice-pub.key, Bob-secret.sec, Bob-cipher.cip)\n");
+    printf("3 - Вычисление секрета Алисы (использует Bob-cipher.cip, Alice-priv.key, Alice-secret.sec)\n");
+    printf("4 - Сравнение секретов (использует Bob-secret.sec и Alice-secret.sec)\n");
+    printf("5 - Вывод Base64 от секрета (использует Alice-secret.sec или Bob-secret.sec, здесь Alice-secret.sec)\n");
+}
+
 // Функция 1: Генерация пары ключей и сохранение в файлы
 void generate_keys(const char *pub_file, const char *priv_file) {
     unsigned char pk[KYBER_PUBLICKEYBYTES];
@@ -141,52 +152,4 @@ void print_base64_secret(const char *secret_file) {
     char base64[ ((KYBER_SSBYTES + 2) / 3) * 4 + 1 ];
     base64_encode(ss, KYBER_SSBYTES, base64);
     printf("Base64 секрета: %s\n", base64);
-}
-
-// Вспомогательная функция для помощи
-void print_help() {
-    printf("Использование: ./program <команда>\n");
-    printf("0 - Помощь\n");
-    printf("1 - Генерация ключей (использует Alice-pub.key и Alice-priv.key)\n");
-    printf("2 - Генерация секрета и шифра Боба (использует Alice-pub.key, Bob-secret.sec, Bob-cipher.cip)\n");
-    printf("3 - Вычисление секрета Алисы (использует Bob-cipher.cip, Alice-priv.key, Alice-secret.sec)\n");
-    printf("4 - Сравнение секретов (использует Bob-secret.sec и Alice-secret.sec)\n");
-    printf("5 - Вывод Base64 от секрета (использует Alice-secret.sec или Bob-secret.sec, здесь Alice-secret.sec)\n");
-}
-
-int main(int argc, char *argv[]) {
-    // if (argc != 2) {
-    //     print_help();
-    //     return 1;
-    // }
-
-    printf("Enter command: ");
-    int cmd = 0;
-    scanf("%d", &cmd);
-
-    switch (cmd) {
-        case 0:
-            print_help();
-            break;
-        case 1:
-            generate_keys("Alice-pub.key", "Alice-priv.key");
-            break;
-        case 2:
-            generate_secret_and_cipher("Alice-pub.key", "Bob-secret.sec", "Bob-cipher.cip");
-            break;
-        case 3:
-            compute_secret("Bob-cipher.cip", "Alice-priv.key", "Alice-secret.sec");
-            break;
-        case 4:
-            compare_secrets("Bob-secret.sec", "Alice-secret.sec");
-            break;
-        case 5:
-            print_base64_secret("Alice-secret.sec");
-            break;
-        default:
-            print_help();
-            break;
-    }
-
-    return 0;
 }
