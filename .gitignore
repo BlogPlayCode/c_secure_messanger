@@ -56,9 +56,11 @@ dkms.conf
 # debug information files
 *.dwo
 
-# kyber installation
+# libs
 kyber/
+mbedtls/
 
 # files by program
 Alice-*
 Bob-*
+encrypted.bin
